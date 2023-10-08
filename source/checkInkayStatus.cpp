@@ -4,7 +4,7 @@
 #include <string>
 #include <format>
 
-#include "externals/cJSON/cJSON.h"
+#include "cJSON/cJSON.h"
 #include "log.h"
 #include "checkInkayStatus.hpp"
 
