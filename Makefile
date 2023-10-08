@@ -23,6 +23,8 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 
+#DEBUG       := 1
+
 #-------------------------------------------------------------------------------
 # options for code generation
 #-------------------------------------------------------------------------------
@@ -31,7 +33,7 @@ CFLAGS	:=	-Wall -O2 -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__
 
-CXXFLAGS	:= $(CFLAGS)
+CXXFLAGS	:= $(CFLAGS) -std=c++20
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH) $(RPXSPECS) --entry=_start -Wl,-Map,$(notdir $*.map)
@@ -41,7 +43,7 @@ ifeq ($(DEBUG),1)
 	CFLAGS += -DDEBUG -g
 endif
 
-LIBS	:= -lwut -liosuhax
+LIBS	:= -lwut -lmocha
 
 #-------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level

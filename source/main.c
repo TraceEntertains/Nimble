@@ -17,13 +17,14 @@
  */
 
 #include <string.h>
-#include <iosuhax.h>
+#include <mocha/mocha.h>
 
 #include <vpad/input.h>
-#include <coreinit/mcp.h>
 
 #include "patches.h"
 #include "log.h"
+
+#include "checkInkayStatus.hpp"
 
 //thanks @Gary#4139 :p
 static void write_string(uint32_t addr, const char* str)
@@ -33,23 +34,28 @@ static void write_string(uint32_t addr, const char* str)
     int num = len - remaining;
 
     for (int i = 0; i < (num / 4); i++) {
-        IOSUHAX_kern_write32(addr + i * 4, *(uint32_t*)(str + i * 4));
+        Mocha_IOSUKernelWrite32(addr + i * 4, *(uint32_t*)(str + i * 4));
     }
 
     if (remaining > 0) {
         uint8_t buf[4];
-        IOSUHAX_kern_read32(addr + num, (uint32_t*)&buf, 1);
+        Mocha_IOSUKernelRead32(addr + num, (uint32_t*)&buf);
 
         for (int i = 0; i < remaining; i++) {
             buf[i] = *(str + num + i);
         }
 
-        IOSUHAX_kern_write32(addr + num, *(uint32_t*)&buf);
+        Mocha_IOSUKernelWrite32(addr + num, *(uint32_t*)&buf);
     }
 }
 
 int main(int argc, char** argv)
 {
+	int mochaResult;
+	if ((mochaResult = Mocha_InitLibrary()) != MOCHA_RESULT_SUCCESS) {
+        log(std::format("Mocha_InitLibrary() failed with code {}", mochaResult).c_str());
+    }
+	
 #ifdef DEBUG
     WHBLogUdpInit();
 #endif
@@ -61,25 +67,25 @@ int main(int argc, char** argv)
     VPADReadError error = VPAD_READ_SUCCESS;
     VPADRead(VPAD_CHAN_0, &status, 1, &error);
 
-    if (status.hold & VPAD_BUTTON_ZL)
+	if (mochaResult != MOCHA_RESULT_SUCCESS) {
+		log("Nimble patches failed!");
+	}
+    else if (skipPatches())
     {
         log("Nimble patches skipped.");
     }
     else
     {
-        if (IOSUHAX_Open(NULL) >= 0) {
-            /* URL patch */
-            for (int i = 0; i < sizeof(url_patches) / sizeof(URL_Patch); i++) {
-                write_string(url_patches[i].address, url_patches[i].url);
-            }
+		/* URL patch */
+		for (int i = 0; i < sizeof(url_patches) / sizeof(URL_Patch); i++) {
+			write_string(url_patches[i].address, url_patches[i].url);
+		}
 
-            IOSUHAX_Close();
-            log("Nimble patches succeeded!");
-        }
-        else
-        {
-            log("Nimble patches failed!");
-        }
+        log("Nimble patches completed!");
+    }
+	
+    if (mochaResult == MOCHA_RESULT_SUCCESS) {
+        Mocha_DeInitLibrary();
     }
 
 #ifdef DEBUG
