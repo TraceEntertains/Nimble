@@ -18,7 +18,6 @@
 
 #include <string.h>
 #include <mocha/mocha.h>
-
 #include <vpad/input.h>
 
 #include "patches.h"
@@ -53,7 +52,7 @@ int main(int argc, char** argv)
 {
 	int mochaResult;
 	if ((mochaResult = Mocha_InitLibrary()) != MOCHA_RESULT_SUCCESS) {
-        log(std::format("Mocha_InitLibrary() failed with code {}", mochaResult).c_str());
+        log("Mocha_InitLibrary() failed with code %d", mochaResult);
     }
 	
 #ifdef DEBUG

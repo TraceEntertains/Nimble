@@ -2,7 +2,6 @@
 #include <mocha/mocha.h>
 
 #include <string>
-#include <format>
 
 #include "cJSON/cJSON.h"
 #include "log.h"
@@ -48,12 +47,9 @@ bool skipPatches() {
     char environmentPathBuffer[0x100];
     MochaUtilsStatus status;
     if ((status = Mocha_GetEnvironmentPath(environmentPathBuffer, sizeof(environmentPathBuffer))) != MOCHA_RESULT_SUCCESS) {
-		log(std::format("Failed to get the environment path. Error: {}", Mocha_GetStatusStr(status)).c_str());
+		log("Failed to get the environment path. Error: %s", Mocha_GetStatusStr(status));
     }
-	
-	log(std::format("The environment path is {}", environmentPathBuffer).c_str());
 
-	
 	FILE* configFile = fopen((environmentPathBuffer + inkayConfigPath).c_str(), "r");
 	if (configFile == NULL) {
 		log("Inkay config file does not exist");
